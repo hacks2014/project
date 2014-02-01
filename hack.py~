@@ -1,0 +1,42 @@
+from flask import jsonify, Flask, render_template, request
+import calendar, time
+app = Flask(__name__)
+
+locations = []
+
+@app.route("/")
+def hello():
+    return render_template("index.html")
+
+@app.route("/locations")
+def get_locations():
+    return jsonify({ "locations": locations })
+
+@app.route("/locations/new", methods=["POST"])
+def add_locations():
+    location = {}
+    location['latitude'] = float(request.form['latitude'])
+    location['longitude'] = float(request.form['longitude'])
+    location['id'] = int(request.form['id'])
+    location['ltime'] = float(calendar.timegm(time.gmtime()))
+    locations.append(location)
+    return "LOCATION SUCCESSFULLY ADDED!!!!!!"
+
+@app.route("/locations/update", methods=["POST"])
+def update_locations():
+    for key in locations:
+        if key["id"] == int(request.form['id']):
+            key["latitude"] = float(request.form['latitude'])
+            key["longitude"] = float(request.form['longitude'])
+            key["ltime"] = float(calendar.timegm(time.gmtime()))
+    return "LOCATION SUCCESSFULLY UPDATED!!!!!"
+
+@app.route("/locations/fetch", methods=["POST"])
+def fetch_by_id():
+    for key in locations:
+        if key["id"] == int(request.form['id']):
+            return jsonify({"info" : key})
+    return "ID DOESN'T EXIST!!!!!""
+
+if __name__ == "__main__":
+    app.run(debug=True)
